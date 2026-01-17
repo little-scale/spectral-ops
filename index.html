@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectral Ops - FFT Audio Processor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>Spectral Ops</h1>
+            <p>FFT-based audio manipulation tool</p>
+        </header>
+
+        <main>
+            <!-- File Upload Section -->
+            <section class="section">
+                <div class="upload-row">
+                    <div class="upload-zone" id="dropZoneA">
+                        <div class="upload-label">A</div>
+                        <div class="upload-content">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18V5l12-2v13M9 9l12-2"/>
+                                <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                            </svg>
+                            <span class="upload-text">Drop audio file or click</span>
+                            <span class="file-name" id="fileNameA"></span>
+                        </div>
+                        <input type="file" id="fileInputA" accept="audio/*" hidden>
+                    </div>
+                    <div class="upload-zone" id="dropZoneB">
+                        <div class="upload-label">B</div>
+                        <div class="upload-content">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18V5l12-2v13M9 9l12-2"/>
+                                <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                            </svg>
+                            <span class="upload-text">Drop audio file or click</span>
+                            <span class="file-name" id="fileNameB"></span>
+                        </div>
+                        <input type="file" id="fileInputB" accept="audio/*" hidden>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualizations - Inputs -->
+            <section class="section">
+                <h2>Input Signals</h2>
+                <div class="viz-row">
+                    <div class="viz-column">
+                        <div class="viz-panel">
+                            <h3>A - Waveform</h3>
+                            <canvas id="waveformA"></canvas>
+                        </div>
+                        <div class="viz-panel">
+                            <h3>A - Spectrogram</h3>
+                            <canvas id="spectrogramA" class="spectrogram"></canvas>
+                        </div>
+                    </div>
+                    <div class="viz-column">
+                        <div class="viz-panel">
+                            <h3>B - Waveform</h3>
+                            <canvas id="waveformB"></canvas>
+                        </div>
+                        <div class="viz-panel">
+                            <h3>B - Spectrogram</h3>
+                            <canvas id="spectrogramB" class="spectrogram"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="section control-section">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label for="operation">Operation</label>
+                        <select id="operation">
+                            <option value="multiply">Multiply (A×B)</option>
+                            <option value="and">AND (min)</option>
+                            <option value="or">OR (max)</option>
+                            <option value="xor">XOR (diff)</option>
+                            <option value="average">Average</option>
+                            <option value="subtract">Subtract (A-B)</option>
+                            <option value="aSquared">A²</option>
+                            <option value="bSquared">B²</option>
+                            <option value="notA">NOT A</option>
+                            <option value="notB">NOT B</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="phaseMode">Phase Source</label>
+                        <select id="phaseMode">
+                            <option value="a">From A</option>
+                            <option value="b">From B</option>
+                            <option value="average">Average</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="windowSize">FFT Size</label>
+                        <select id="windowSize">
+                            <option value="512">512</option>
+                            <option value="1024">1024</option>
+                            <option value="2048">2048</option>
+                            <option value="4096" selected>4096</option>
+                            <option value="8192">8192</option>
+                            <option value="16384">16384</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="overlap">Overlap <span id="overlapValue">75</span>%</label>
+                        <input type="range" id="overlap" min="0" max="90" step="5" value="75">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="timeMatch" checked>
+                            <span>Time-stretch</span>
+                        </label>
+                    </div>
+
+                    <button id="processBtn" class="btn btn-process" disabled>
+                        Process
+                    </button>
+                </div>
+            </section>
+
+            <!-- Playback Controls -->
+            <section class="section playback-section">
+                <div class="playback-row">
+                    <div class="playback-group">
+                        <span class="playback-label">Preview A</span>
+                        <button id="playBtnA" class="btn btn-play btn-small" disabled>Play</button>
+                    </div>
+                    <div class="playback-group">
+                        <span class="playback-label">Preview B</span>
+                        <button id="playBtnB" class="btn btn-play btn-small" disabled>Play</button>
+                    </div>
+                    <div class="playback-group">
+                        <span class="playback-label">Output</span>
+                        <button id="playBtn" class="btn btn-play btn-small" disabled>Play</button>
+                    </div>
+                    <div class="control-group">
+                        <label for="playbackRate">Speed <span id="playbackRateValue">1.0</span>x</label>
+                        <input type="range" id="playbackRate" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <button id="exportBtn" class="btn btn-export" disabled>Export WAV</button>
+                </div>
+            </section>
+
+            <!-- Output Visualization -->
+            <section class="section">
+                <h2>Output</h2>
+                <div class="viz-output">
+                    <div class="viz-panel">
+                        <h3>Waveform</h3>
+                        <canvas id="waveformOutput"></canvas>
+                    </div>
+                    <div class="viz-panel">
+                        <h3>Spectrogram</h3>
+                        <canvas id="spectrogramOutput" class="spectrogram-large"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p id="loadingText">Processing...</p>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="operations.js"></script>
+    <script src="audio-processor.js"></script>
+    <script src="visualizer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

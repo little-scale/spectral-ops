@@ -1,0 +1,10 @@
+Create the following, an FFT operations processor. Here is the idea: 
+1) The user drags and drops two input audio files, A and B
+2) The web app analyses both with a user determined window size e.g. 4096 and overlap 
+3) The timing of both files is matched so that the new length is in the middle between both eg A is 10 seconds, B is 20 seconds, output resynthesises is 15 seconds
+4) This length or playback rate of the output can be changed e.g. 1x, 2x, 0.5x etc. Changing the rate does not change the pitch, as we are resynthesising from FFT frames
+5) Visually, the user should see the FFT result across both files 
+6) The user can then apply operations to create a new and interesting result e.g. and, or, xor, not a, not b, a * b, a ^ 2, b ^ 2 etc. Any operations that could work well are welcomed here. 
+7) These operations are performed on the magnitude of the bins of each signal. How do deal with the phases is up to you. Maybe retain from A. Retain from b as options? Other approaches? The user should also see the fft result from the operations - this should update with operations, settings changes etc. Of course, we should be able to see and hear the resulting sound and export it. 
+8) I suspect that an and or a * will work best. Thoughts? 
+9) Before creating, please plan ahead, think hard and include any features that you think might be necessary. 
